@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELMNINI Homes — Carousel Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  :root { --ink:#030d18; --navy:#071629; --navy2:#0c2040; --gold:#c8a84b; --gold2:#e6cc7a; --gold3:#f5e4a8; --white:#ffffff; --fog:#a8b8cc; }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#030d18;color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+  body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.4;}
+
+  header{padding:44px 72px 36px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(200,168,75,0.14);position:relative;}
+  header::after{content:'';position:absolute;bottom:0;left:72px;right:72px;height:1px;background:linear-gradient(90deg,var(--gold),rgba(200,168,75,0.1),transparent);}
+  .brand-lockup{display:flex;align-items:center;gap:20px;}
+  .brand-diamond{width:52px;height:52px;background:linear-gradient(135deg,var(--gold),var(--gold2));transform:rotate(45deg);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 28px rgba(200,168,75,0.3);}
+  .brand-diamond span{transform:rotate(-45deg);font-size:22px;}
+  .brand-name{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:4px;color:var(--white);line-height:1;}
+  .brand-name em{color:var(--gold);font-style:normal;}
+  .brand-sub{font-size:11px;color:var(--fog);letter-spacing:3px;text-transform:uppercase;margin-top:4px;}
+  .header-actions{display:flex;gap:14px;align-items:center;}
+  .btn{padding:13px 28px;border-radius:3px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border:none;transition:all .28s ease;}
+  .btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);}
+  .btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(200,168,75,0.4);}
+  .btn-outline{background:transparent;border:1.5px solid rgba(200,168,75,0.45);color:var(--gold);}
+  .btn-outline:hover{background:rgba(200,168,75,0.07);border-color:var(--gold);}
+
+  .info-bar{display:flex;align-items:center;padding:22px 72px;border-bottom:1px solid rgba(255,255,255,0.04);gap:48px;flex-wrap:wrap;}
+  .info-item{display:flex;align-items:center;gap:10px;}
+  .info-dot{width:8px;height:8px;background:var(--gold);border-radius:50%;box-shadow:0 0 10px rgba(200,168,75,0.6);}
+  .info-text{font-size:12px;color:var(--fog);letter-spacing:1.5px;text-transform:uppercase;}
+  .info-text strong{color:var(--white);font-weight:600;}
+
+  .real-data-banner{margin:20px 72px 0;padding:16px 24px;background:rgba(200,168,75,0.05);border:1px solid rgba(200,168,75,0.2);border-radius:10px;font-size:13px;color:var(--fog);display:flex;align-items:flex-start;gap:14px;}
+  .real-data-banner strong{color:var(--gold2);}
+  .rdb-icon{font-size:20px;flex-shrink:0;margin-top:1px;}
+  .rdb-listings{margin-top:8px;display:flex;flex-wrap:wrap;gap:8px;}
+  .rdb-tag{background:rgba(200,168,75,0.08);border:1px solid rgba(200,168,75,0.2);border-radius:4px;padding:4px 10px;font-size:11px;color:var(--gold);letter-spacing:0.5px;}
+
+  .slides-section{padding:52px 72px 80px;display:grid;grid-template-columns:repeat(3,1fr);gap:32px;}
+  .slide-card{background:rgba(12,32,64,0.4);border:1px solid rgba(200,168,75,0.1);border-radius:14px;overflow:hidden;transition:all .4s cubic-bezier(0.16,1,0.3,1);}
+  .slide-card:hover{transform:translateY(-10px) scale(1.015);border-color:rgba(200,168,75,0.45);box-shadow:0 28px 70px rgba(0,0,0,0.6),0 0 50px rgba(200,168,75,0.07);}
+  .slide-number-tag{padding:10px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(200,168,75,0.08);}
+  .sn-badge{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:3px;color:var(--gold);background:rgba(200,168,75,0.08);border:1px solid rgba(200,168,75,0.2);border-radius:100px;padding:3px 14px;}
+  .sn-label{font-size:11px;color:var(--fog);letter-spacing:1px;text-transform:uppercase;}
+  .slide-preview-wrap{width:100%;padding-top:100%;position:relative;overflow:hidden;background:var(--ink);}
+  .slide-preview-inner{position:absolute;inset:0;display:flex;}
+  .slide-footer{padding:16px 18px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(200,168,75,0.08);}
+  .slide-footer-title{font-size:12px;font-weight:600;color:var(--white);line-height:1.3;max-width:180px;}
+  .dl-btn{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s ease;flex-shrink:0;}
+  .dl-btn:hover{transform:scale(1.15);box-shadow:0 0 20px rgba(200,168,75,0.55);}
+  .dl-btn svg{width:16px;height:16px;}
+  .zolo-link-row{padding:8px 18px 10px;border-top:1px solid rgba(200,168,75,0.05);}
+  .zolo-link{font-size:11px;color:rgba(200,168,75,0.55);text-decoration:none;letter-spacing:0.5px;}
+  .zolo-link:hover{color:var(--gold);}
+  .url-override{padding:10px 18px 14px;border-top:1px solid rgba(200,168,75,0.06);}
+  .url-override-label{font-size:10px;color:#a8b8cc;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;}
+  .url-override-row{display:flex;gap:8px;}
+  .url-input{flex:1;background:rgba(7,22,41,0.6);border:1px solid rgba(200,168,75,0.2);border-radius:4px;padding:8px 12px;color:#fff;font-size:11px;font-family:'DM Sans',sans-serif;outline:none;}
+  .url-apply{padding:8px 14px;background:rgba(200,168,75,0.15);border:1px solid rgba(200,168,75,0.35);border-radius:4px;color:#c8a84b;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;white-space:nowrap;}
+
+  .overlay{display:none;position:fixed;inset:0;background:rgba(3,13,24,0.93);z-index:10000;flex-direction:column;align-items:center;justify-content:center;gap:22px;backdrop-filter:blur(10px);}
+  .overlay.show{display:flex;}
+  .overlay-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:5px;color:var(--gold);}
+  .overlay-progress-wrap{width:280px;height:3px;background:rgba(200,168,75,0.15);border-radius:2px;overflow:hidden;}
+  .overlay-progress{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:2px;transition:width .3s ease;width:0%;}
+  .overlay-sub{font-size:12px;color:var(--fog);letter-spacing:2px;}
+
+  /* ════ SLIDE DESIGNS ════ */
+  .slide-design{width:1080px;height:1080px;position:absolute;top:0;left:0;transform-origin:top left;overflow:hidden;font-family:'DM Sans',sans-serif;}
+
+  /* COVER */
+  .cover-slide{background:var(--ink);}
+  .cover-img{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(0.40) saturate(0.8);}
+  .cover-overlay{position:absolute;inset:0;background:linear-gradient(175deg,rgba(3,13,24,0.1) 0%,rgba(3,13,24,0.4) 35%,rgba(3,13,24,0.88) 75%,rgba(3,13,24,0.97) 100%);}
+  .cover-grid-lines{position:absolute;inset:0;background-image:linear-gradient(rgba(200,168,75,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(200,168,75,0.04) 1px,transparent 1px);background-size:90px 90px;}
+  .cover-content{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:0 88px 108px;z-index:5;}
+  .cover-eyebrow{display:flex;align-items:center;gap:18px;margin-bottom:36px;}
+  .cover-eyebrow-line{width:56px;height:2px;background:linear-gradient(90deg,var(--gold),rgba(200,168,75,0.2));}
+  .cover-eyebrow-text{font-size:20px;font-weight:700;letter-spacing:6px;text-transform:uppercase;color:var(--gold);}
+  .cover-title{font-family:'Cormorant Garamond',serif;font-size:106px;font-weight:700;line-height:0.95;color:var(--white);margin-bottom:32px;letter-spacing:-2px;}
+  .cover-title em{color:var(--gold);font-style:normal;}
+  .cover-subtitle{font-size:26px;color:rgba(255,255,255,0.65);font-weight:400;letter-spacing:1px;max-width:700px;line-height:1.5;margin-bottom:56px;}
+  .cover-divider{width:100%;height:1px;background:linear-gradient(90deg,var(--gold),rgba(200,168,75,0.1),transparent);margin-bottom:40px;}
+  .cover-brand-row{display:flex;align-items:center;justify-content:space-between;}
+  .cover-brand-left{display:flex;align-items:center;gap:18px;}
+  .cover-brand-hex{width:46px;height:46px;background:linear-gradient(135deg,var(--gold),var(--gold2));clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);}
+  .cover-brand-name{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:4px;color:var(--white);line-height:1;}
+  .cover-brand-name span{color:var(--gold);}
+  .cover-brand-sub{font-size:14px;color:var(--fog);letter-spacing:1.5px;}
+  .cover-brand-right{text-align:right;}
+  .cover-brand-web{font-size:18px;color:var(--gold);letter-spacing:1px;}
+  .cover-brand-loc{font-size:14px;color:var(--fog);margin-top:4px;}
+  .cover-slide-num{position:absolute;top:72px;right:88px;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:5px;color:rgba(200,168,75,0.4);z-index:5;}
+  .cover-corner-tl,.cover-corner-br{position:absolute;width:100px;height:100px;z-index:5;}
+  .cover-corner-tl{top:60px;left:60px;border-top:2px solid rgba(200,168,75,0.35);border-left:2px solid rgba(200,168,75,0.35);}
+  .cover-corner-br{bottom:60px;right:60px;border-bottom:2px solid rgba(200,168,75,0.35);border-right:2px solid rgba(200,168,75,0.35);}
+  .cover-gold-bar{position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--gold),var(--gold2),rgba(200,168,75,0.1));z-index:6;}
+  .swipe-hint{position:absolute;bottom:260px;right:88px;display:flex;align-items:center;gap:14px;z-index:10;}
+  .swipe-hint-text{font-size:17px;color:rgba(255,255,255,0.4);letter-spacing:2px;}
+  .swipe-hint-arrow{font-size:22px;color:var(--gold);opacity:0.6;}
+
+  /* PROPERTY SLIDES */
+  .prop-slide{background:var(--ink);}
+  .prop-img{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(0.38) saturate(0.75);}
+  .prop-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,13,24,0.15) 0%,rgba(3,13,24,0.3) 30%,rgba(3,13,24,0.75) 60%,rgba(3,13,24,0.97) 100%);}
+  .prop-overlay2{position:absolute;inset:0;background:linear-gradient(90deg,rgba(3,13,24,0.6) 0%,transparent 60%);}
+  .prop-slide-num{position:absolute;top:64px;right:80px;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:5px;color:rgba(200,168,75,0.5);z-index:10;}
+  .prop-badge{position:absolute;top:64px;left:80px;background:rgba(200,168,75,0.12);border:1.5px solid rgba(200,168,75,0.4);border-radius:100px;padding:12px 28px;display:flex;align-items:center;gap:10px;z-index:10;}
+  .prop-badge-dot{width:8px;height:8px;background:var(--gold);border-radius:50%;}
+  .prop-badge-text{font-size:17px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold);}
+  .prop-mls{position:absolute;top:162px;left:80px;z-index:10;font-size:15px;color:rgba(255,255,255,0.38);letter-spacing:1px;}
+  .prop-address{position:absolute;top:194px;left:80px;z-index:10;font-size:18px;color:rgba(200,168,75,0.75);letter-spacing:0.5px;font-weight:600;}
+  .prop-price-tag{position:absolute;left:80px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:4px 16px 16px 4px;padding:20px 40px;z-index:10;}
+  .prop-price{font-family:'Bebas Neue',sans-serif;font-size:76px;line-height:1;color:var(--navy);letter-spacing:1px;}
+  .prop-price-sub{font-size:18px;font-weight:700;color:rgba(5,22,41,0.7);letter-spacing:2px;margin-top:4px;}
+  .prop-content-bottom{position:absolute;bottom:0;left:0;right:0;padding:0 80px 72px;z-index:10;}
+  .prop-location-row{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+  .prop-location-icon{font-size:22px;}
+  .prop-location-text{font-size:24px;color:rgba(255,255,255,0.75);font-weight:500;}
+  .prop-title{font-family:'Cormorant Garamond',serif;font-size:68px;font-weight:700;color:var(--white);line-height:1.05;letter-spacing:-1px;margin-bottom:28px;}
+  .prop-caption{font-size:26px;color:rgba(255,255,255,0.6);line-height:1.5;max-width:840px;margin-bottom:40px;font-weight:400;font-style:italic;}
+  .prop-stats{display:flex;gap:0;background:rgba(7,22,41,0.7);border:1px solid rgba(200,168,75,0.2);border-radius:12px;overflow:hidden;backdrop-filter:blur(12px);margin-bottom:36px;}
+  .prop-stat{flex:1;padding:28px 24px;display:flex;align-items:center;gap:16px;border-right:1px solid rgba(200,168,75,0.12);}
+  .prop-stat:last-child{border-right:none;}
+  .prop-stat-icon{font-size:30px;flex-shrink:0;}
+  .prop-stat-val{font-family:'Bebas Neue',sans-serif;font-size:38px;color:var(--gold);line-height:1;}
+  .prop-stat-lbl{font-size:18px;color:var(--fog);line-height:1;margin-top:4px;}
+  .prop-footer{display:flex;align-items:center;justify-content:space-between;}
+  .prop-footer-left{display:flex;align-items:center;gap:14px;}
+  .prop-footer-hex{width:36px;height:36px;background:linear-gradient(135deg,var(--gold),var(--gold2));clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);}
+  .prop-footer-name{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--white);}
+  .prop-footer-sub{font-size:14px;color:var(--fog);}
+  .prop-footer-right{text-align:right;}
+  .prop-footer-web{font-size:16px;color:var(--gold);letter-spacing:0.5px;}
+  .prop-footer-loc{font-size:13px;color:var(--fog);}
+  .prop-gold-bar{position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--gold),var(--gold2),rgba(200,168,75,0.1));z-index:10;}
+  .prop-corner-tl,.prop-corner-br{position:absolute;width:80px;height:80px;z-index:10;}
+  .prop-corner-tl{top:50px;left:50px;border-top:1.5px solid rgba(200,168,75,0.3);border-left:1.5px solid rgba(200,168,75,0.3);}
+  .prop-corner-br{bottom:50px;right:50px;border-bottom:1.5px solid rgba(200,168,75,0.3);border-right:1.5px solid rgba(200,168,75,0.3);}
+  .deco-line{position:absolute;pointer-events:none;z-index:4;width:1px;height:280px;background:linear-gradient(180deg,transparent,rgba(200,168,75,0.25),transparent);}
+  .prop-dots{position:absolute;bottom:230px;right:80px;display:flex;gap:10px;z-index:10;flex-direction:column;}
+  .prop-dot{width:8px;height:8px;border-radius:50%;background:rgba(200,168,75,0.25);border:1.5px solid rgba(200,168,75,0.3);}
+  .prop-dot.active{background:var(--gold);box-shadow:0 0 8px rgba(200,168,75,0.6);width:8px;height:28px;border-radius:4px;}
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay">
+  <div class="overlay-title" id="overlayTitle">EXPORTING SLIDES…</div>
+  <div class="overlay-progress-wrap"><div class="overlay-progress" id="overlayBar"></div></div>
+  <div class="overlay-sub" id="overlaySub">Please wait</div>
+</div>
+
+<header>
+  <div class="brand-lockup">
+    <div class="brand-diamond"><span>🏠</span></div>
+    <div class="brand-text">
+      <div class="brand-name">ELMNINI <em>HOMES</em></div>
+      <div class="brand-sub">Instagram Carousel Generator · Toronto</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-outline" id="btnZip">⬇ Download ZIP</button>
+    <button class="btn btn-gold" id="btnAll">↓ Download All 6 Slides</button>
+  </div>
+</header>
+
+<div class="info-bar">
+  <div class="info-item"><div class="info-dot"></div><div class="info-text"><strong>6</strong> Slides Ready</div></div>
+  <div class="info-item"><div class="info-dot"></div><div class="info-text"><strong>1080 × 1080</strong> px · Instagram Format</div></div>
+  <div class="info-item"><div class="info-dot"></div><div class="info-text">Topic: <strong>Homes Under $500K in Toronto</strong></div></div>
+  <div class="info-item"><div class="info-dot"></div><div class="info-text">Agent: <strong>Hussein Elmnini</strong></div></div>
+</div>
+
+<div class="real-data-banner">
+  <span class="rdb-icon">✅</span>
+  <div>
+    <strong>Real MLS® Listings — Verified on Zolo.ca (March 2025)</strong><br>
+    Cover = Downtown Toronto / CN Tower. Property images are Unsplash (free license). To use actual listing photos, paste the image URL in the field below each slide.
+    <div class="rdb-listings">
+      <span class="rdb-tag">MLS® E12724576 · 203–5225 Finch Ave E · $449,000 · 2bd/2ba</span>
+      <span class="rdb-tag">MLS® E12816596 · Agincourt S-Malvern W · $488,000 · 2+1bd/2ba</span>
+      <span class="rdb-tag">MLS® C12828374 · Yonge-Eglinton · $479,000 · 1bd/1ba</span>
+      <span class="rdb-tag">MLS® C12826382 · Mount Pleasant W · $399,000 · 1bd/1ba</span>
+      <span class="rdb-tag">MLS® C12864574 · Waterfront C8, Downtown · $466,000 · 1bd/1ba</span>
+    </div>
+  </div>
+</div>
+
+<div class="slides-section" id="slidesGrid"></div>
+
+<script>
+// ── COVER: Real downtown Toronto / CN Tower photo (Unsplash free)
+const COVER_IMG = 'https://images.unsplash.com/photo-1517090504586-fde19ea6066f?w=1080&q=85';
+
+// ── Real condo/property photos (Unsplash free license — replace with actual listing photos via URL override below)
+const PROP_IMGS = [
+  'https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=1080&q=80',
+  'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1080&q=80',
+  'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1080&q=80',
+  'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1080&q=80',
+  'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=1080&q=80',
+];
+
+// ── REAL ZOLO.CA MLS® LISTINGS (verified March 2025) ──
+const properties = [
+  {
+    mls:'E12724576', price:'$449,000', address:'203 – 5225 Finch Ave E',
+    type:'2-Bed Condo', location:'Agincourt North, Toronto',
+    beds:'2', baths:'2', sqft:'700–799',
+    caption:'Ensuite laundry, parking & locker included. Water, heat & CAC included. Near Scarborough Town Centre & TTC.',
+    zoloUrl:'https://www.zolo.ca/toronto-real-estate/5225-finch-avenue-east/203',
+    img:PROP_IMGS[0], idx:2
+  },
+  {
+    mls:'E12816596', price:'$488,000', address:'Agincourt South-Malvern West',
+    type:'2+1 Bed Condo', location:'Agincourt, Scarborough',
+    beds:'2+1', baths:'2', sqft:'900–999',
+    caption:'Bright 2+1 bed corner unit near Scarborough TC, TTC transit & Hwy 401 access.',
+    zoloUrl:'https://www.zolo.ca/toronto-real-estate/scarborough/condos',
+    img:PROP_IMGS[1], idx:3
+  },
+  {
+    mls:'C12828374', price:'$479,000', address:'Yonge-Eglinton Area',
+    type:'1-Bed Condo', location:'Yonge-Eglinton, Midtown Toronto',
+    beds:'1', baths:'1', sqft:'0–499',
+    caption:'Steps to the Eglinton Crosstown LRT. Century 21 listing in one of Toronto\'s most sought-after midtown pockets.',
+    zoloUrl:'https://www.zolo.ca/toronto-real-estate/north-toronto/condos',
+    img:PROP_IMGS[2], idx:4
+  },
+  {
+    mls:'C12826382', price:'$399,000', address:'Mount Pleasant West',
+    type:'1-Bed Condo', location:'Mount Pleasant W, Midtown Toronto',
+    beds:'1', baths:'1', sqft:'500–599',
+    caption:'Brand new (0–5 yr old) build listed by Royal LePage Signature Realty. Prime midtown location.',
+    zoloUrl:'https://www.zolo.ca/toronto-real-estate/north-toronto/condos',
+    img:PROP_IMGS[3], idx:5
+  },
+  {
+    mls:'C12864574', price:'$466,000', address:'Waterfront Communities C8',
+    type:'1-Bed Condo', location:'Waterfront, Downtown Toronto',
+    beds:'1', baths:'1', sqft:'0–499',
+    caption:'Downtown waterfront condo listed by HomeLife Landmark. Steps from Lake Ontario & the Financial District.',
+    zoloUrl:'https://www.zolo.ca/toronto-real-estate/downtown/condos',
+    img:PROP_IMGS[4], idx:6
+  }
+];
+
+/* BUILD SLIDES */
+function buildCoverSlide(imgUrl) {
+  return `<div class="slide-design cover-slide" id="slide-design-1">
+    <div class="cover-gold-bar"></div>
+    <div class="cover-img" style="background-image:url('${imgUrl}')"></div>
+    <div class="cover-overlay"></div><div class="cover-grid-lines"></div>
+    <div class="cover-corner-tl"></div><div class="cover-corner-br"></div>
+    <div class="cover-slide-num">01 / 06</div>
+    <div class="swipe-hint"><span class="swipe-hint-text">SWIPE</span><span class="swipe-hint-arrow">→</span></div>
+    <div class="cover-content">
+      <div class="cover-eyebrow"><div class="cover-eyebrow-line"></div><div class="cover-eyebrow-text">Market Spotlight</div></div>
+      <h1 class="cover-title">Homes Sold<br>Under <em>$500K</em><br>in Toronto</h1>
+      <p class="cover-subtitle">Real MLS® listings from the market — curated by your local expert.</p>
+      <div class="cover-divider"></div>
+      <div class="cover-brand-row">
+        <div class="cover-brand-left">
+          <div class="cover-brand-hex"></div>
+          <div><div class="cover-brand-name">ELMNINI <span>HOMES</span></div><div class="cover-brand-sub">Real Estate Advisors</div></div>
+        </div>
+        <div class="cover-brand-right"><div class="cover-brand-web">elmninihomes.ca</div><div class="cover-brand-loc">📍 Toronto, Canada</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildPropSlide(prop) {
+  const dots = Array.from({length:5},(_,i)=>`<div class="prop-dot ${i===(prop.idx-2)?'active':''}"></div>`).join('');
+  const bedLabel = prop.beds.includes('+') ? 'Beds' : (prop.beds==='1'?'Bed':'Beds');
+  return `<div class="slide-design prop-slide" id="slide-design-${prop.idx}">
+    <div class="prop-gold-bar"></div>
+    <div class="prop-img" style="background-image:url('${prop.img}')"></div>
+    <div class="prop-overlay"></div><div class="prop-overlay2"></div>
+    <div class="prop-corner-tl"></div><div class="prop-corner-br"></div>
+    <div class="deco-line" style="right:160px;top:100px;transform:rotate(30deg);"></div>
+    <div class="prop-badge"><div class="prop-badge-dot"></div><div class="prop-badge-text">For Sale</div></div>
+    <div class="prop-slide-num">0${prop.idx} / 06</div>
+    <div class="prop-dots">${dots}</div>
+    <div class="prop-mls">MLS® ${prop.mls}</div>
+    <div class="prop-address">${prop.address}</div>
+    <div class="prop-price-tag" style="top:270px;">
+      <div class="prop-price">${prop.price}</div>
+      <div class="prop-price-sub">${prop.type.toUpperCase()}</div>
+    </div>
+    <div class="prop-content-bottom">
+      <div class="prop-location-row"><span class="prop-location-icon">📍</span><span class="prop-location-text">${prop.location}</span></div>
+      <h2 class="prop-title">${prop.type}</h2>
+      <p class="prop-caption">${prop.caption}</p>
+      <div class="prop-stats">
+        <div class="prop-stat"><div class="prop-stat-icon">🛏</div><div><div class="prop-stat-val">${prop.beds}</div><div class="prop-stat-lbl">${bedLabel}</div></div></div>
+        <div class="prop-stat"><div class="prop-stat-icon">🚿</div><div><div class="prop-stat-val">${prop.baths}</div><div class="prop-stat-lbl">${prop.baths==='1'?'Bath':'Baths'}</div></div></div>
+        <div class="prop-stat"><div class="prop-stat-icon">📐</div><div><div class="prop-stat-val" style="font-size:22px;line-height:1.1;">${prop.sqft}</div><div class="prop-stat-lbl">Sq Ft</div></div></div>
+        <div class="prop-stat"><div class="prop-stat-icon">🏙️</div><div><div class="prop-stat-val" style="font-size:24px;line-height:1.1;">GTA</div><div class="prop-stat-lbl">Toronto</div></div></div>
+      </div>
+      <div class="prop-footer">
+        <div class="prop-footer-left"><div class="prop-footer-hex"></div><div><div class="prop-footer-name">ELMNINI HOMES</div><div class="prop-footer-sub">Hussein Elmnini · Real Estate Advisor</div></div></div>
+        <div class="prop-footer-right"><div class="prop-footer-web">elmninihomes.ca</div><div class="prop-footer-loc">Toronto, Canada</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+const slideLabels = [
+  'Cover — Downtown Toronto CN Tower',
+  'Slide 2 — 5225 Finch Ave E · $449K',
+  'Slide 3 — Agincourt S-Malvern · $488K',
+  'Slide 4 — Yonge-Eglinton · $479K',
+  'Slide 5 — Mount Pleasant W · $399K',
+  'Slide 6 — Waterfront Downtown · $466K',
+];
+
+function buildCard(idx, html, label, zoloUrl) {
+  const card = document.createElement('div');
+  card.className = 'slide-card';
+
+  card.innerHTML = `
+    <div class="slide-number-tag">
+      <div class="sn-badge">Slide ${idx}</div>
+      <div class="sn-label">${label.split('—')[1]?.trim()||''}</div>
+    </div>
+    <div class="slide-preview-wrap">
+      <div class="slide-preview-inner">${html}</div>
+    </div>
+    <div class="slide-footer">
+      <div class="slide-footer-title">${label}</div>
+      <button class="dl-btn" data-idx="${idx}" title="Download PNG">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#071629" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </button>
+    </div>
+    ${zoloUrl ? `<div class="zolo-link-row"><a class="zolo-link" href="${zoloUrl}" target="_blank">🔗 View on Zolo.ca →</a></div>` : ''}
+    <div class="url-override">
+      <div class="url-override-label">📎 Replace image — paste direct photo URL</div>
+      <div class="url-override-row">
+        <input class="url-input" type="text" placeholder="https://..." data-slide="${idx}"/>
+        <button class="url-apply" data-apply="${idx}">Apply</button>
+      </div>
+    </div>`;
+  return card;
+}
+
+function init() {
+  const grid = document.getElementById('slidesGrid');
+  grid.appendChild(buildCard(1, buildCoverSlide(COVER_IMG), slideLabels[0], null));
+  properties.forEach((p,i) => grid.appendChild(buildCard(p.idx, buildPropSlide(p), slideLabels[i+1], p.zoloUrl)));
+  setTimeout(scaleSlides, 60);
+
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-apply]');
+    if (!btn) return;
+    const idx = parseInt(btn.dataset.apply);
+    const input = document.querySelector(`input[data-slide="${idx}"]`);
+    const url = input.value.trim();
+    if (!url) return;
+    const design = document.getElementById(`slide-design-${idx}`);
+    const el = design?.querySelector('.cover-img, .prop-img');
+    if (el) el.style.backgroundImage = `url('${url}')`;
+    input.value = '';
+    input.placeholder = '✓ Updated!';
+    setTimeout(() => { input.placeholder = 'https://...'; }, 3000);
+  });
+}
+
+function scaleSlides() {
+  document.querySelectorAll('.slide-preview-wrap').forEach(wrap => {
+    const w = wrap.offsetWidth;
+    const design = wrap.querySelector('.slide-design');
+    if (design) { design.style.transform = `scale(${w/1080})`; wrap.style.height = w + 'px'; }
+  });
+}
+window.addEventListener('resize', scaleSlides);
+
+/* DOWNLOAD */
+function setOverlay(show, title='EXPORTING…', sub='Please wait', pct=0) {
+  document.getElementById('overlay').classList.toggle('show', show);
+  document.getElementById('overlayTitle').textContent = title;
+  document.getElementById('overlaySub').textContent = sub;
+  document.getElementById('overlayBar').style.width = pct + '%';
+}
+
+async function captureSlide(idx) {
+  const design = document.getElementById(`slide-design-${idx}`);
+  const orig = design.style.transform;
+  design.style.transform = 'none';
+  design.style.width = '1080px'; design.style.height = '1080px';
+  await new Promise(r => setTimeout(r, 400));
+  const canvas = await html2canvas(design, { width:1080, height:1080, scale:1, useCORS:true, allowTaint:true, backgroundColor:'#030d18', logging:false, imageTimeout:10000 });
+  design.style.transform = orig;
+  return canvas;
+}
+
+async function downloadSlide(idx) {
+  setOverlay(true, `CAPTURING SLIDE ${idx}…`, 'Rendering…', 30);
+  try {
+    const c = await captureSlide(idx);
+    const a = document.createElement('a');
+    a.download = `elmnini-slide-${String(idx).padStart(2,'0')}.png`;
+    a.href = c.toDataURL('image/png', 1.0); a.click();
+  } catch(e){console.error(e);}
+  setOverlay(false);
+}
+
+async function downloadAll() {
+  for(let i=1;i<=6;i++){
+    setOverlay(true,`EXPORTING SLIDE ${i}/6`,`Processing…`,Math.round((i-1)/6*100));
+    await new Promise(r=>setTimeout(r,150));
+    try { const c=await captureSlide(i); const a=document.createElement('a'); a.download=`elmnini-slide-${String(i).padStart(2,'0')}.png`; a.href=c.toDataURL('image/png',1.0); a.click(); await new Promise(r=>setTimeout(r,700)); } catch(e){console.error(e);}
+  }
+  setOverlay(false);
+}
+
+async function downloadZip() {
+  const zip=new JSZip(); const folder=zip.folder('elmnini-carousel');
+  for(let i=1;i<=6;i++){
+    setOverlay(true,`BUILDING ZIP — SLIDE ${i}/6`,`Rendering…`,Math.round((i-1)/6*90));
+    await new Promise(r=>setTimeout(r,150));
+    try { const c=await captureSlide(i); folder.file(`slide-${String(i).padStart(2,'0')}.png`,c.toDataURL('image/png',1.0).split(',')[1],{base64:true}); await new Promise(r=>setTimeout(r,300)); } catch(e){console.error(e);}
+  }
+  setOverlay(true,'COMPRESSING…','Almost done…',94);
+  const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
+  setOverlay(true,'DONE!','Saving ZIP…',100); await new Promise(r=>setTimeout(r,400));
+  const a=document.createElement('a'); a.download='elmnini-homes-carousel.zip'; a.href=URL.createObjectURL(blob); a.click();
+  setOverlay(false);
+}
+
+document.getElementById('btnAll').addEventListener('click', downloadAll);
+document.getElementById('btnZip').addEventListener('click', downloadZip);
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.dl-btn');
+  if (btn) downloadSlide(parseInt(btn.dataset.idx));
+});
+
+init();
+</script>
+</body>
+</html>
