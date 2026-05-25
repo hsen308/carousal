@@ -14,12 +14,16 @@
 }
 html,body{height:100%;overflow:hidden}
 body{min-height:100vh;background:var(--cream);font-family:'Amiri',serif;display:flex;align-items:center;justify-content:center;position:relative;}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(201,165,85,.10) 0%,transparent 60%),radial-gradient(ellipse 60% 80% at 80% 90%,rgba(107,124,92,.08) 0%,transparent 60%),linear-gradient(160deg,#fdf6ee 0%,#f7ead8 50%,#fdf6ee 100%);animation:bgPulse 8s ease-in-out infinite alternate;z-index:0;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(201,165,85,.10) 0%,transparent 60%),radial-gradient(ellipse 60% 80% at 80% 90%,rgba(107,124,92,.08) 0%,transparent 60%),linear-gradient(160deg,#fdf6ee 0%,#f7ead8 50%,#fdf6ee 100%);animation:bgPulse 8s ease-in-out infinite alternate;z-index:0;
+  pointer-event:none;}
 @keyframes bgPulse{0%{opacity:1}100%{opacity:.85}}
 #canvas{position:fixed;inset:0;pointer-events:none;z-index:1;}
 #scene{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;gap:32px;transition:opacity .6s ease,transform .6s ease;}
 #scene.hide{opacity:0;transform:scale(.9);pointer-events:none}
-.env-outer{position:relative;width:320px;height:220px;cursor:pointer;animation:float 3.2s ease-in-out infinite;filter:drop-shadow(0 18px 48px rgba(100,70,30,.22));transition:filter .3s;}
+.env-outer{position:relative;width:320px;height:220px;cursor:pointer;animation:float 3.2s ease-in-out infinite;filter:drop-shadow(0 18px 48px rgba(100,70,30,.22));transition:filter .3s;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
 .env-outer:hover{filter:drop-shadow(0 24px 56px rgba(100,70,30,.32))}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
 .env-body{position:absolute;inset:0;background:linear-gradient(155deg,#fef5e4 0%,#f5dfc0 100%);border-radius:4px 4px 10px 10px;border:1.5px solid var(--gold-light);}
@@ -140,6 +144,7 @@ function loop(ts){
 requestAnimationFrame(loop);
 function burst(cx,cy,n=28){for(let i=0;i<n;i++){const p=mk(false);p.x=cx+rnd(-140,140);p.y=cy+rnd(-80,80);p.vy=rnd(1.2,3.8);p.sc=rnd(.7,2);p.a=rnd(.4,1);pts.push(p);}}
 let done=false;
+document.getElementById('env').addEvenistener('touchstart',function(e){e.preventDefault();open_env();},{passive:false});
 function open_env(){
   if(done)return;done=true;
   document.getElementById('env').classList.add('open');
